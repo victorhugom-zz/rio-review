@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  reviewservice:
+    image: user/reviewservice${TAG}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80"
