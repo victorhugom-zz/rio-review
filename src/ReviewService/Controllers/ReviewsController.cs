@@ -12,14 +12,15 @@ namespace ReviewService.Controllers
     [Route("api/[controller]")]
     public class ReviewsController : Controller
     {
-        public MongoRepositoryBase<Review> reviewRepo => new MongoRepositoryBase<Review>(new MongoClient(""));
-        
+        public MongoRepositoryBase<Review> reviewRepo => new MongoRepositoryBase<Review>(new MongoClient("mongodb://localhost:27017"));
+
+        // TEMP
         // GET api/reviews
-        //[HttpGet]
-        //public IEnumerable<Review> Get()
-        //{
-        //    return reviewRepo.GetItems(x => true);
-        //}
+        [HttpGet]
+        public IEnumerable<Review> Get()
+        {
+            return reviewRepo.GetItems(x => true);
+        }
 
         // GET api/reviews/5
         [HttpGet("{id}")]
@@ -63,19 +64,19 @@ namespace ReviewService.Controllers
         }
 
         // GET api/reviews/item/5/rating
-        [HttpGet("item/{id}/rating")]
-        public decimal GetItemRating(string id)
+        [HttpGet("item/{itemId}/rating")]
+        public decimal GetItemRating(string itemId)
         {
-            return reviewRepo.GetItems(x => x.Approved && x.ItemId == id)
-                .Average(x => x.Rating);
+            return reviewRepo.GetItems(x => x.Approved && x.ItemId == itemId)
+                .GetAverageRating();
         }
 
         // GET api/reviews/item/5
-        [HttpGet("item/{id}")]
-        public IEnumerable<Review> GetReviewsByItems(string id)
+        [HttpGet("item/{itemId}")]
+        public IEnumerable<Review> GetReviewsByItems(string itemId)
         {
-            return reviewRepo.GetItems(x => x.Approved && x.ItemId == id)
-                .OrderByDescending(x => x.GetRelevance());
+            return reviewRepo.GetItems(x => x.Approved && x.ItemId == itemId)
+                .OrderedByRelevance();
         }
 
         // PUT api/values/5
@@ -85,10 +86,12 @@ namespace ReviewService.Controllers
         //    await reviewRepo.Update(id, review);
         //}
 
+        //TEMP
         // DELETE api/values/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
+        [HttpDelete("{id}")]
+        public async Task Delete(string id)
+        {
+            await reviewRepo.Delete(id);
+        }
     }
 }

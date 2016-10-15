@@ -8,6 +8,11 @@ namespace ReviewService.Models
 {
     public class Review : IDocumentBase
     {
+        public Review()
+        {
+            Votes = new List<Vote>();
+        }
+
         public string Id { get; set; }
         public string Type => nameof(Review);
         public string ItemId { get; set; }
@@ -18,16 +23,24 @@ namespace ReviewService.Models
         public string Text { get; set; }
         public List<Vote> Votes { get; set; }
         public bool Approved { get; set; }
-
-        public int GetRelevance()
-        {
-            return Votes.Count(x => x.IsRelevant);
-        }
     }
 
     public class Vote
     {
         public string AuthorId { get; set; }
-        public bool IsRelevant { get; set; }
+        public bool? IsRelevant { get; set; }
+    }
+
+    public static class ReviewExtensions
+    {
+        public static IEnumerable<Review> OrderedByRelevance(this IQueryable<Review> reviews)
+        {
+            return reviews.ToList().OrderByDescending(x => x.Votes.Count(v => v.IsRelevant ?? false));
+        }
+
+        public static decimal GetAverageRating(this IQueryable<Review> reviews)
+        {
+            return reviews.ToList().Average(x => x.Rating);
+        }
     }
 }
