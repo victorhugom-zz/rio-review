@@ -42,5 +42,16 @@ namespace ReviewService.Models
         {
             return reviews.ToList().Average(x => x.Rating);
         }
+
+        public static Dictionary<int, int> GetStarsSummary(this IQueryable<Review> reviews)
+        {
+            return reviews.ToList().Aggregate(new Dictionary<int, int>()
+            {
+                { 1, 0 }, { 2, 0 }, { 3, 0 }, { 4, 0 }, { 5, 0 }
+            }, (acc, curr) => {
+                acc[(int)Math.Floor(curr.Rating)]++;
+                return acc;
+            });
+        }
     }
 }

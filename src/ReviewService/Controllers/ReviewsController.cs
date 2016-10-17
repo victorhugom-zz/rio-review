@@ -13,15 +13,7 @@ namespace ReviewService.Controllers
     public class ReviewsController : Controller
     {
         public MongoRepositoryBase<Review> reviewRepo => new MongoRepositoryBase<Review>(new MongoClient("mongodb://localhost:27017"));
-
-        // TEMP
-        // GET api/reviews
-        [HttpGet]
-        public IEnumerable<Review> Get()
-        {
-            return reviewRepo.GetItems(x => true);
-        }
-
+        
         // GET api/reviews/5
         [HttpGet("{id}")]
         public Review Get(string id)
@@ -67,31 +59,26 @@ namespace ReviewService.Controllers
         [HttpGet("item/{itemId}/rating")]
         public decimal GetItemRating(string itemId)
         {
-            return reviewRepo.GetItems(x => x.Approved && x.ItemId == itemId)
-                .GetAverageRating();
+            return GetItems(itemId).GetAverageRating();
         }
 
         // GET api/reviews/item/5
         [HttpGet("item/{itemId}")]
         public IEnumerable<Review> GetReviewsByItems(string itemId)
         {
-            return reviewRepo.GetItems(x => x.Approved && x.ItemId == itemId)
-                .OrderedByRelevance();
+            return GetItems(itemId).OrderedByRelevance();
         }
 
-        // PUT api/values/5
-        //[HttpPut("{id}")]
-        //public async Task Put(string id, [FromBody]Review review)
-        //{
-        //    await reviewRepo.Update(id, review);
-        //}
-
-        //TEMP
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public async Task Delete(string id)
+        // GET api/reviews/item/5/rating
+        [HttpGet("item/{itemId}/starsSummary")]
+        public Dictionary<int, int> GetStarsSummary(string itemId)
         {
-            await reviewRepo.Delete(id);
+            return GetItems(itemId).GetStarsSummary();
+        }
+
+        private IQueryable<Review> GetItems(string itemId)
+        {
+            return reviewRepo.GetItems(x => x.Approved && x.ItemId == itemId);
         }
     }
 }
