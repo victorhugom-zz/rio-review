@@ -40,8 +40,10 @@ namespace ReviewService.Controllers
 
         // POST api/reviews
         [HttpPost]
-        public async Task Post([FromBody]Review review)
+        public async Task Post([FromBody]ReviewInput input)
         {
+            var review = input.ToReview();
+
             await reviewRepo.Create(review);
         }
 
@@ -64,9 +66,9 @@ namespace ReviewService.Controllers
 
         // GET api/reviews/item/5
         [HttpGet("item/{itemId}")]
-        public IEnumerable<Review> GetReviewsByItems(string itemId)
+        public IEnumerable<ReviewResult> GetReviewsByItems(string itemId)
         {
-            return GetItems(itemId).OrderedByRelevance();
+            return GetItems(itemId).OrderedByRelevance().Select(x => new ReviewResult(x));
         }
 
         // GET api/reviews/item/5/rating
@@ -79,6 +81,74 @@ namespace ReviewService.Controllers
         private IQueryable<Review> GetItems(string itemId)
         {
             return reviewRepo.GetItems(x => x.Approved && x.ItemId == itemId);
+        }
+
+        public class ReviewResult
+        {
+            public string Id { get; set; }
+            public string AuthorName { get; set; }
+            public DateTime DateCreated { get; set; }
+            public decimal Rating { get; set; }
+            public string Text { get; set; }
+            public string Title { get; set; }
+            public Dictionary<int, int> Votes { get; set; }
+
+            public ReviewResult(Review review)
+            {
+                Id = review.Id;
+                AuthorName = review.AuthorName;
+                DateCreated = review.DateCreated;
+                Rating = review.Rating;
+                Text = review.Text;
+                Title = review.Title;
+                Votes = review.Votes.Aggregate(new Dictionary<int, int>() { { +1, 0 }, { -1, 0 } }, (acc, curr) =>
+                {
+                    int vote;
+                    if (curr.IsRelevant == null)
+                    {
+                        return acc;
+                    }
+                    else if (curr.IsRelevant == true)
+                    {
+                        vote = +1;
+                    }
+                    else
+                    {
+                        vote = -1;
+                    }
+
+                    acc[vote]++;
+
+                    return acc;
+                });
+            }
+        }
+
+        public class ReviewInput
+        {
+            public string ItemId { get; set; }
+            public string ItemName { get; set; } //TODO from db
+            public string AuthorId { get; set; }
+            public string AuthorName { get; set; } //TODO from db
+            public decimal Rating { get; set; }
+            public string Text { get; set; }
+            public string Title { get; set; }
+
+            public Review ToReview()
+            {
+                return new Review()
+                {
+                    Approved = true,
+                    DateCreated = DateTime.Now,
+                    AuthorId = AuthorId,
+                    AuthorName = AuthorName,
+                    ItemId = ItemId,
+                    ItemName = ItemName,
+                    Rating = Rating,
+                    Text = Text,
+                    Title = Title,
+                };
+            }
         }
     }
 }

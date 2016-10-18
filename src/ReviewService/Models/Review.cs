@@ -11,6 +11,7 @@ namespace ReviewService.Models
         public Review()
         {
             Votes = new List<Vote>();
+            DateCreated = DateTime.Now;
         }
 
         public string Id { get; set; }
@@ -20,9 +21,11 @@ namespace ReviewService.Models
         public string AuthorId { get; set; }
         public string AuthorName { get; set; }
         public decimal Rating { get; set; }
+        public string Title { get; set; }
         public string Text { get; set; }
         public List<Vote> Votes { get; set; }
         public bool Approved { get; set; }
+        public DateTime DateCreated { get; set; }
     }
 
     public class Vote
@@ -35,7 +38,7 @@ namespace ReviewService.Models
     {
         public static IEnumerable<Review> OrderedByRelevance(this IQueryable<Review> reviews)
         {
-            return reviews.ToList().OrderByDescending(x => x.Votes.Count(v => v.IsRelevant ?? false));
+            return reviews.ToList().OrderByDescending(x => x.Votes.Count(v => v.IsRelevant ?? false) - x.Votes.Count(v => !v.IsRelevant ?? false));
         }
 
         public static decimal GetAverageRating(this IQueryable<Review> reviews)
@@ -49,7 +52,15 @@ namespace ReviewService.Models
             {
                 { 1, 0 }, { 2, 0 }, { 3, 0 }, { 4, 0 }, { 5, 0 }
             }, (acc, curr) => {
-                acc[(int)Math.Floor(curr.Rating)]++;
+                var stars = (int)Math.Floor(curr.Rating);
+
+                if (!acc.Keys.Contains(stars))
+                {
+                    return acc;
+                }
+                
+                acc[stars]++;
+
                 return acc;
             });
         }
