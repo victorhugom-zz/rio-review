@@ -41,12 +41,17 @@ namespace ReviewService.Models
             return reviews.ToList().OrderByDescending(x => x.Votes.Count(v => v.IsRelevant ?? false) - x.Votes.Count(v => !v.IsRelevant ?? false));
         }
 
+        public static IEnumerable<Review> OrderedByDate(this IQueryable<Review> reviews)
+        {
+            return reviews.OrderByDescending(x => x.DateCreated);
+        }
+
         public static decimal GetAverageRating(this IQueryable<Review> reviews)
         {
             return reviews.ToList().Average(x => x.Rating);
         }
 
-        public static Dictionary<int, int> GetStarsSummary(this IQueryable<Review> reviews)
+        public static Dictionary<string, int> GetStarsSummary(this IQueryable<Review> reviews)
         {
             return reviews.ToList().Aggregate(new Dictionary<int, int>()
             {
@@ -58,11 +63,15 @@ namespace ReviewService.Models
                 {
                     return acc;
                 }
-                
+
                 acc[stars]++;
 
                 return acc;
-            });
+            }).ToDictionary(x => x.Key == 1 ? "oneStar" :
+                x.Key == 2 ? "twoStars" :
+                x.Key == 3 ? "threeStars" :
+                x.Key == 4 ? "fourStars" :
+                x.Key == 5 ? "fiveStars" : "", x => x.Value);
         }
     }
 }
