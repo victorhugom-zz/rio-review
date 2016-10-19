@@ -23,12 +23,13 @@ namespace ReviewService.Controllers
         /// <param name="order">pass "date" to order by date or use default behavior by relevance</param>
         /// <param name="skip">skip this many for pagination sake</param>
         /// <param name="take">take this many for pagination sake</param>
+        /// <param name="onlyApproved">consider only approved</param>
         /// <returns>list of reviews</returns>
         [HttpGet("item/{itemId}")]
-        public IEnumerable<ReviewResult> GetReviewsByItems(string itemId, [FromHeader]string authorId, [FromQuery]string order, [FromQuery]int skip = 0, [FromQuery]int take = 5, [FromQuery]bool showAll = false)
+        public IEnumerable<ReviewResult> GetReviewsByItems(string itemId, [FromHeader]string authorId, [FromQuery]string order, [FromQuery]int skip = 0, [FromQuery]int take = 5, [FromQuery]bool onlyApproved = true)
         {
             take = Math.Min(take, 100);
-            var items = GetItems(itemId, showAll);
+            var items = GetItems(itemId, onlyApproved);
             IEnumerable<Review> sorted;
 
             if (order == "date")
@@ -96,11 +97,12 @@ namespace ReviewService.Controllers
         /// get the average rating of an item
         /// </summary>
         /// <param name="itemId">item id</param>
+        /// <param name="onlyApproved">consider only approved</param>
         /// <returns>average rating</returns>
         [HttpGet("item/{itemId}/rating")]
-        public decimal GetItemRating(string itemId)
+        public decimal GetItemRating(string itemId, [FromQuery]bool onlyApproved = true)
         {
-            return GetItems(itemId).GetAverageRating();
+            return GetItems(itemId, onlyApproved).GetAverageRating();
         }
 
         // GET api/reviews/item/5/rating
@@ -108,6 +110,7 @@ namespace ReviewService.Controllers
         /// returns a descrete representation of the ratings of an item
         /// </summary>
         /// <param name="itemId">item id</param>
+        /// <param name="onlyApproved">consider only approved</param>
         /// <returns>
         /// {
         /// "oneStar": 0,
@@ -118,9 +121,9 @@ namespace ReviewService.Controllers
         /// }
         /// </returns>
         [HttpGet("item/{itemId}/starsSummary")]
-        public Dictionary<string, int> GetStarsSummary(string itemId)
+        public Dictionary<string, int> GetStarsSummary(string itemId, [FromQuery]bool onlyApproved = true)
         {
-            return GetItems(itemId).GetStarsSummary();
+            return GetItems(itemId, onlyApproved).GetStarsSummary();
         }
         
         // POST api/reviews/5/approve
@@ -147,9 +150,9 @@ namespace ReviewService.Controllers
             return this.Ok();
         }
 
-        private IQueryable<Review> GetItems(string itemId, bool showAll = false)
+        private IQueryable<Review> GetItems(string itemId, bool onlyApproved = true)
         {
-            return reviewRepo.GetItems(x => x.ItemId == itemId && (showAll || x.Approved));
+            return reviewRepo.GetItems(x => x.ItemId == itemId && (!onlyApproved || x.Approved));
         }
 
         public class ReviewResult

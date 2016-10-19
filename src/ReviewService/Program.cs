@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 
 namespace ReviewService
 {
@@ -12,7 +13,16 @@ namespace ReviewService
     {
         public static void Main(string[] args)
         {
+            var builder = new ConfigurationBuilder();
+            builder.AddInMemoryCollection(new Dictionary<string, string>
+            {
+                { "server.urls", "http://localhost:5060" }
+            });
+            builder.AddCommandLine(args);
+            var config = builder.Build();
+
             var host = new WebHostBuilder()
+                .UseConfiguration(config)
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
