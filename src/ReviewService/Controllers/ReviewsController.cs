@@ -26,7 +26,7 @@ namespace ReviewService.Controllers
         /// <param name="onlyApproved">consider only approved</param>
         /// <returns>list of reviews</returns>
         [HttpGet("item/{itemId}")]
-        public IEnumerable<ReviewResult> GetReviewsByItems(string itemId, [FromHeader]string authorId, [FromQuery]string order, [FromQuery]int skip = 0, [FromQuery]int take = 5, [FromQuery]bool onlyApproved = true)
+        public IEnumerable<ReviewResult> GetReviewsByItems(string itemId, [FromQuery]string authorId, [FromQuery]string order, [FromQuery]int skip = 0, [FromQuery]int take = 5, [FromQuery]bool onlyApproved = true)
         {
             take = Math.Min(take, 100);
             var items = GetItems(itemId, onlyApproved);
@@ -50,11 +50,13 @@ namespace ReviewService.Controllers
         /// </summary>
         /// <param name="input">review witch is going to be registered</param>
         [HttpPost]
-        public async Task Post([FromBody]ReviewInput input)
+        public async Task<IActionResult> Post([FromBody]ReviewInput input)
         {
             var review = input.ToReview();
 
             await reviewRepo.Create(review);
+
+            return this.Ok(new ReviewResult(review));
         }
 
         // POST api/reviews/5/vote
@@ -66,11 +68,11 @@ namespace ReviewService.Controllers
         /// <param name="authorId">who is voting</param>
         /// <returns>returns the updated review</returns>
         [HttpPost("{id}/vote")]
-        public IActionResult PostVote(string id, [FromBody]bool isRelevant, [FromHeader]string authorId)
+        public IActionResult PostVote(string id, [FromBody]bool? isRelevant, [FromQuery]string authorId)
         {
             var review = reviewRepo.Get(id);
 
-            if (review == null)
+            if (review == null || authorId == null)
             {
                 return this.BadRequest();
             }
@@ -166,7 +168,7 @@ namespace ReviewService.Controllers
             public bool? IsRelevant { get; set; }
             public Dictionary<int, int> Votes { get; set; }
 
-            public ReviewResult(Review review, string authorId)
+            public ReviewResult(Review review, string authorId = null)
             {
                 Id = review.Id;
                 AuthorName = review.AuthorName;
@@ -201,9 +203,9 @@ namespace ReviewService.Controllers
         public class ReviewInput
         {
             public string ItemId { get; set; }
-            public string ItemName { get; set; } //TODO from db
+            public string ItemName { get; set; }
             public string AuthorId { get; set; }
-            public string AuthorName { get; set; } //TODO from db
+            public string AuthorName { get; set; }
             public decimal Rating { get; set; }
             public string Text { get; set; }
             public string Title { get; set; }
@@ -212,7 +214,7 @@ namespace ReviewService.Controllers
             {
                 return new Review()
                 {
-                    Approved = true,
+                    //Approved = true,
                     DateCreated = DateTime.Now,
                     AuthorId = AuthorId,
                     AuthorName = AuthorName,
