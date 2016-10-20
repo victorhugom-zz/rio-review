@@ -43,6 +43,19 @@ namespace ReviewService.Controllers
 
             return sorted.Skip(skip).Take(take).Select(x => new ReviewResult(x, authorId));
         }
+        
+        [HttpGet("item/{itemId}/author/{authorId}")]
+        public IActionResult GetReviewsByItemsAndAuthor(string itemId, string authorId)
+        {
+            var review = reviewRepo.GetItems(x => x.ItemId == itemId && x.AuthorId == authorId).FirstOrDefault();
+
+            if (review == null)
+            {
+                return this.BadRequest();
+            }
+
+            return this.Ok(new ReviewResult(review, authorId));
+        }
 
         // POST api/reviews
         /// <summary>
@@ -54,8 +67,15 @@ namespace ReviewService.Controllers
         {
             var review = input.ToReview();
 
-            await reviewRepo.Create(review);
+            var found = reviewRepo.GetItems(x => x.AuthorId == input.AuthorId && x.ItemId == review.ItemId).FirstOrDefault();
 
+            if (found == null)
+            {
+                await reviewRepo.Create(review);
+            } else {
+                await reviewRepo.Update(found.Id, review);
+            }
+            
             return this.Ok(new ReviewResult(review));
         }
 
