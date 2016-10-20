@@ -12,7 +12,7 @@ namespace ReviewService.Controllers
     [Route("api/[controller]")]
     public class ReviewsController : Controller
     {
-        public MongoRepositoryBase<Review> reviewRepo => new MongoRepositoryBase<Review>(new MongoClient("mongodb://localhost:27017"));
+        public MongoRepositoryBase<Review> reviewRepo => new MongoRepositoryBase<Review>(new MongoClient(new MongoClientSettings() { Server = new MongoServerAddress("mongo", 27017) }));
 
         // GET api/reviews/item/5        
         /// <summary>

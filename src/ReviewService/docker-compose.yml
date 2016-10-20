@@ -3,8 +3,13 @@ version: '2'
 services:
   reviewservice:
     image: user/reviewservice${TAG}
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     ports:
-      - "80"
+      - "5060:5060"
+    links:
+      - mongo
+
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
