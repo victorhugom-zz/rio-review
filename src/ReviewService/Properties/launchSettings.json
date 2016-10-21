@@ -19,7 +19,7 @@
     "ReviewService": {
       "commandName": "Project",
       "launchBrowser": true,
-      "commandLineArgs": "--server.urls http://localhost:5061",
+      "commandLineArgs": "--server.urls http://localhost:5060",
       "launchUrl": "http://localhost:5061/swagger/ui/index.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

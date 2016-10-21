@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using ReviewService.Models;
 using ReviewService.Repositories;
 using MongoDB.Driver;
@@ -12,8 +13,12 @@ namespace ReviewService.Controllers
     [Route("api/[controller]")]
     public class ReviewsController : Controller
     {
-        public MongoRepositoryBase<Review> reviewRepo => new MongoRepositoryBase<Review>(new MongoClient(new MongoClientSettings() { Server = new MongoServerAddress("mongo", 27017) }));
+#if DEBUG
+        public MongoRepositoryBase<Review> ReviewRepo => new MongoRepositoryBase<Review>(new MongoClient(new MongoClientSettings() { Server = new MongoServerAddress("localhost", 27017) }));
+#else
+        public MongoRepositoryBase<Review> ReviewRepo => new MongoRepositoryBase<Review>(new MongoClient(new MongoClientSettings() { Server = new MongoServerAddress("mongo", 27017) }));
 
+#endif
         // GET api/reviews/item/5        
         /// <summary>
         /// Get reviews by item
@@ -30,31 +35,23 @@ namespace ReviewService.Controllers
         {
             take = Math.Min(take, 100);
             var items = GetItems(itemId, onlyApproved);
-            IEnumerable<Review> sorted;
 
-            if (order == "date")
-            {
-                sorted = items.OrderedByDate();
-            }
-            else
-            {
-                sorted = items.OrderedByRelevance();
-            }
+            var sorted = order == "date" ? items.OrderedByDate() : items.OrderedByRelevance();
 
             return sorted.Skip(skip).Take(take).Select(x => new ReviewResult(x, authorId));
         }
-        
+
         [HttpGet("item/{itemId}/author/{authorId}")]
         public IActionResult GetReviewsByItemsAndAuthor(string itemId, string authorId)
         {
-            var review = reviewRepo.GetItems(x => x.ItemId == itemId && x.AuthorId == authorId).FirstOrDefault();
+            var review = ReviewRepo.GetItems(x => x.ItemId == itemId && x.AuthorId == authorId).FirstOrDefault();
 
             if (review == null)
             {
-                return this.BadRequest();
+                return BadRequest($"Review not found: item id {itemId} | author id {authorId}");
             }
 
-            return this.Ok(new ReviewResult(review, authorId));
+            return Ok(new ReviewResult(review, authorId));
         }
 
         // POST api/reviews
@@ -67,16 +64,21 @@ namespace ReviewService.Controllers
         {
             var review = input.ToReview();
 
-            var found = reviewRepo.GetItems(x => x.AuthorId == input.AuthorId && x.ItemId == review.ItemId).FirstOrDefault();
+            var found = ReviewRepo.GetItems(x => x.AuthorId == input.AuthorId && x.ItemId == review.ItemId).FirstOrDefault();
 
             if (found == null)
             {
-                await reviewRepo.Create(review);
-            } else {
-                await reviewRepo.Update(found.Id, review);
+                await ReviewRepo.Create(review);
             }
-            
-            return this.Ok(new ReviewResult(review));
+            else
+            {
+                found.Text = input.Text;
+                found.Title = input.Title;
+                found.Rating = input.Rating;
+                await ReviewRepo.Update(found.Id, found);
+            }
+
+            return Ok(new ReviewResult(review));
         }
 
         // POST api/reviews/5/vote
@@ -90,26 +92,29 @@ namespace ReviewService.Controllers
         [HttpPost("{id}/vote")]
         public IActionResult PostVote(string id, [FromBody]bool? isRelevant, [FromQuery]string authorId)
         {
-            var review = reviewRepo.Get(id);
+            var review = ReviewRepo.Get(id);
 
-            if (review == null || authorId == null)
-            {
-                return this.BadRequest();
-            }
+            if (string.IsNullOrEmpty(authorId))
+                return BadRequest("Author cannot be null or empty");
+
+            if (review == null)
+                return this.BadRequest($"Review not found: {id}");
 
             var found = review.Votes.FirstOrDefault(x => x.AuthorId == authorId);
             if (found != null)
             {
                 found.IsRelevant = isRelevant;
-            } else {
-                review.Votes.Add(new Vote()
+            }
+            else
+            {
+                review.Votes.Add(new Vote
                 {
                     AuthorId = authorId,
                     IsRelevant = isRelevant
                 });
             }
 
-            reviewRepo.Update(id, review);
+            ReviewRepo.Update(id, review);
 
             return this.Ok(new ReviewResult(review, authorId));
         }
@@ -147,7 +152,7 @@ namespace ReviewService.Controllers
         {
             return GetItems(itemId, onlyApproved).GetStarsSummary();
         }
-        
+
         // POST api/reviews/5/approve
         /// <summary>
         /// approve review to be displayed
@@ -158,23 +163,23 @@ namespace ReviewService.Controllers
         [HttpPost("{id}/approve")]
         public async Task<IActionResult> PostApprove(string id, [FromBody]bool approved)
         {
-            var review = reviewRepo.Get(id);
+            var review = ReviewRepo.Get(id);
 
             if (review == null)
             {
-                return this.BadRequest();
+                return BadRequest($"Review for item not found: ${id}");
             }
 
             review.Approved = approved;
 
-            await reviewRepo.Update(id, review);
+            await ReviewRepo.Update(id, review);
 
             return this.Ok();
         }
 
         private IQueryable<Review> GetItems(string itemId, bool onlyApproved = true)
         {
-            return reviewRepo.GetItems(x => x.ItemId == itemId && (!onlyApproved || x.Approved));
+            return ReviewRepo.GetItems(x => x.ItemId == itemId && (!onlyApproved || x.Approved));
         }
 
         public class ReviewResult
@@ -200,17 +205,16 @@ namespace ReviewService.Controllers
                 Votes = review.Votes.Aggregate(new Dictionary<int, int>() { { +1, 0 }, { -1, 0 } }, (acc, curr) =>
                 {
                     int vote;
-                    if (curr.IsRelevant == null)
+                    switch (curr.IsRelevant)
                     {
-                        return acc;
-                    }
-                    else if (curr.IsRelevant == true)
-                    {
-                        vote = +1;
-                    }
-                    else
-                    {
-                        vote = -1;
+                        case null:
+                            return acc;
+                        case true:
+                            vote = +1;
+                            break;
+                        default:
+                            vote = -1;
+                            break;
                     }
 
                     acc[vote]++;
