@@ -14,8 +14,8 @@ namespace ReviewService.Repositories
         private IMongoCollection<T> _collection;
         private IMongoDatabase _database;
 
-        public IMongoCollection<T> Collection { get { return _collection; } }
-        public IMongoDatabase Database { get { return _database; } }
+        public IMongoCollection<T> Collection => _collection;
+        public IMongoDatabase Database => _database;
 
         public MongoRepositoryBase(MongoClient client)
         {
