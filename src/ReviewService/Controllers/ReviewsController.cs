@@ -36,8 +36,7 @@ namespace ReviewService.Controllers
             
             var sorted = order == "date" ? ReviewRepository.GetOrderedByDate(itemId, onlyApproved) : 
                                             ReviewRepository.GetOrderedByRelevance(itemId, onlyApproved);
-
-            var result = sorted
+           var result = sorted
                 .Skip(skip)
                 .Take(take)
                 .Select(x => new ReviewResult(x, authorId));
@@ -101,6 +100,9 @@ namespace ReviewService.Controllers
 
             if (review == null)
                 return BadRequest($"Review not found: {id}");
+
+            if(review.AuthorId == authorId)
+                return BadRequest("Cannot upvote your own review");
 
             var found = review.Votes.FirstOrDefault(x => x.AuthorId == authorId);
             if (found != null)

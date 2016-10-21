@@ -32,7 +32,7 @@ namespace ReviewService.Repositories
 
         public decimal GetAverageRating(string itemId, bool onlyApproved = true)
         {
-            var query = GetItems(x => true).Average(x => x.Rating);
+            var query = GetItems(x => x.ItemId == itemId).Average(x => x.Rating);
             return query;
         }
 
