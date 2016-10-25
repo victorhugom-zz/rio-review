@@ -2,9 +2,6 @@ version: '2'
 
 services:
   reviewservice:
-    build:
-      args:
-        source: obj/Docker/empty/
     labels:
       - "com.microsoft.visualstudio.targetoperatingsystem=linux"
     environment:

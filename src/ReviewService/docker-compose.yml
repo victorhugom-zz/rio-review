@@ -2,7 +2,7 @@ version: '2'
 
 services:
   reviewservice:
-    image: user/reviewservice${TAG}
+    image: metheora/review-service
     build: .
     ports:
       - "5060:5060"
@@ -13,3 +13,5 @@ services:
     image: mongo
     ports:
       - "27017:27017"
+    volumes:
+      - ./db:/data/db
