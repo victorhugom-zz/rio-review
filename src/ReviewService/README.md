@@ -2,8 +2,13 @@
 
 # Building images
 
-docker build -t metheora/review-service:{version} 
-docker push
+docker build -t metheora/review-service .
+
+docker tag metheora/review-service:{vesion}
+docker tag metheora/review-service:latest
+
+docker push metheora/review-service:{vesion}
+docker push metheora/review-service:latest
 
 ## Usage
 
