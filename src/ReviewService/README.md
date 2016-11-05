@@ -1,5 +1,10 @@
 # Review Service
 
+# Building images
+
+docker build -t metheora/review-service:{version} 
+docker push
+
 ## Usage
 
 `mkdir review`

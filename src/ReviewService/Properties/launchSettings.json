@@ -16,11 +16,20 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "ReviewService": {
+    "ReviewService.Ortobom": {
       "commandName": "Project",
+      "commandLineArgs": "--server.urls http://localhost:5052 --dbHost localhost --dbPort 27017",
       "launchBrowser": true,
-      "commandLineArgs": "--server.urls http://localhost:5060",
-      "launchUrl": "http://localhost:5061/swagger/ui/index.html",
+      "launchUrl": "http://localhost:5052/swagger/ui/index.html",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "ReviewService.ShoppingMatriz": {
+      "commandName": "Project",
+      "commandLineArgs": "--server.urls http://localhost:5053 --dbHost localhost --dbPort 27017",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:5053/swagger/ui/index.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

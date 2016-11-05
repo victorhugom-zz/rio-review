@@ -12,12 +12,22 @@ namespace ReviewService.Controllers
     [Route("api/[controller]")]
     public class ReviewsController : Controller
     {
-#if DEBUG
-        public ReviewRepository ReviewRepository => new ReviewRepository(new MongoClient(new MongoClientSettings() { Server = new MongoServerAddress("localhost", 27017) }));
-#else
-        public MongoRepositoryBase<Review> ReviewRepository => new MongoRepositoryBase<Review>(new MongoClient(new MongoClientSettings() { Server = new MongoServerAddress("mongo", 27017) }));
+        public ReviewRepository ReviewRepository => new ReviewRepository(new MongoClient(new MongoClientSettings()
+        {
+            Server = new MongoServerAddress(Program.DbHost, Program.DbPort)
+        }));
 
-#endif
+        [HttpGet("ping")]
+        public IActionResult ping()
+        {
+            return Ok(new
+            {
+                Active = true,
+                Program.DbPort,
+                Program.DbHost,
+            });
+        }
+
         // GET api/reviews/item/5        
         /// <summary>
         /// Get reviews by item
@@ -33,13 +43,13 @@ namespace ReviewService.Controllers
         public IActionResult GetReviewsByItems(string itemId, [FromQuery]string authorId, [FromQuery]string order, [FromQuery]int skip = 0, [FromQuery]int take = 5, [FromQuery]bool onlyApproved = true)
         {
             take = Math.Min(take, 100);
-            
-            var sorted = order == "date" ? ReviewRepository.GetOrderedByDate(itemId, onlyApproved) : 
+
+            var sorted = order == "date" ? ReviewRepository.GetOrderedByDate(itemId, onlyApproved) :
                                             ReviewRepository.GetOrderedByRelevance(itemId, onlyApproved);
-           var result = sorted
-                .Skip(skip)
-                .Take(take)
-                .Select(x => new ReviewResult(x, authorId));
+            var result = sorted
+                 .Skip(skip)
+                 .Take(take)
+                 .Select(x => new ReviewResult(x, authorId));
 
             return Ok(result);
         }
@@ -101,7 +111,7 @@ namespace ReviewService.Controllers
             if (review == null)
                 return BadRequest($"Review not found: {id}");
 
-            if(review.AuthorId == authorId)
+            if (review.AuthorId == authorId)
                 return BadRequest("Cannot upvote your own review");
 
             var found = review.Votes.FirstOrDefault(x => x.AuthorId == authorId);

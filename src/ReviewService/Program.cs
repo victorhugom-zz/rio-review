@@ -11,6 +11,8 @@ namespace ReviewService
 {
     public class Program
     {
+        public static string DbHost { get; private set; }
+        public static int DbPort { get; private set; }
         public static void Main(string[] args)
         {
             var builder = new ConfigurationBuilder();
@@ -20,6 +22,9 @@ namespace ReviewService
             });
             builder.AddCommandLine(args);
             var config = builder.Build();
+
+            DbHost = config["dbHost"];
+            DbPort = int.Parse(config["dbPort"]);
 
             var host = new WebHostBuilder()
                 .UseConfiguration(config)
