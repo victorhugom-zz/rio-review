@@ -4,8 +4,8 @@
 
 docker build -t metheora/review-service .
 
-docker tag metheora/review-service:{vesion}
-docker tag metheora/review-service:latest
+docker tag metheora/review-service metheora/review-service:{vesion}
+docker tag metheora/review-service metheora/review-service:latest
 
 docker push metheora/review-service:{vesion}
 docker push metheora/review-service:latest
