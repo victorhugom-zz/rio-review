@@ -39,7 +39,8 @@ namespace ReviewService.Controllers
         /// <param name="take">take this many for pagination sake</param>
         /// <param name="onlyApproved">consider only approved</param>
         /// <returns>list of reviews</returns>
-        [HttpGet("item/{itemId}")]
+        [HttpGet("item/{itemId}"), 
+            Produces(typeof(ReviewResult))]
         public IActionResult GetReviewsByItems(string itemId, [FromQuery]string authorId, [FromQuery]string order, [FromQuery]int skip = 0, [FromQuery]int take = 5, [FromQuery]bool onlyApproved = true)
         {
             take = Math.Min(take, 100);
@@ -54,7 +55,8 @@ namespace ReviewService.Controllers
             return Ok(result);
         }
 
-        [HttpGet("item/{itemId}/author/{authorId}")]
+        [HttpGet("item/{itemId}/author/{authorId}"),
+            Produces(typeof(ReviewResult))]
         public IActionResult GetReviewsByItemsAndAuthor(string itemId, string authorId)
         {
             var review = ReviewRepository.GetItems(x => x.ItemId == itemId && x.AuthorId == authorId).FirstOrDefault();
@@ -70,7 +72,8 @@ namespace ReviewService.Controllers
         /// Register new review
         /// </summary>
         /// <param name="input">review witch is going to be registered</param>
-        [HttpPost]
+        [HttpPost,
+            Produces(typeof(ReviewResult))]
         public async Task<IActionResult> Post([FromBody]ReviewInput input)
         {
             var review = input.ToReview();
@@ -86,7 +89,10 @@ namespace ReviewService.Controllers
                 found.Text = input.Text;
                 found.Title = input.Title;
                 found.Rating = input.Rating;
+                found.Votes = new List<Vote>();
                 await ReviewRepository.Update(found.Id, found);
+
+                return Ok(new ReviewResult(found));
             }
 
             return Ok(new ReviewResult(review));
@@ -100,7 +106,8 @@ namespace ReviewService.Controllers
         /// <param name="isRelevant">true = +1, false = -1, null = 0</param>
         /// <param name="authorId">who is voting</param>
         /// <returns>returns the updated review</returns>
-        [HttpPost("{id}/vote")]
+        [HttpPost("{id}/vote"),
+            Produces(typeof(ReviewResult))]
         public IActionResult PostVote(string id, [FromBody]bool? isRelevant, [FromQuery]string authorId)
         {
             var review = ReviewRepository.Get(id);
@@ -161,7 +168,7 @@ namespace ReviewService.Controllers
         /// "fiveStars": 1
         /// }
         /// </returns>
-        [HttpGet("item/{itemId}/starsSummary")]
+        [HttpGet("item/{itemId}/starsSummary"), Produces(typeof(Dictionary<string,int>))]
         public Dictionary<string, int> GetStarsSummary(string itemId, [FromQuery]bool onlyApproved = true)
         {
             return ReviewRepository.GetStarsSummary(itemId, onlyApproved);
@@ -174,7 +181,8 @@ namespace ReviewService.Controllers
         /// <param name="id">review id</param>
         /// <param name="approved">is approved</param>
         /// <returns></returns>
-        [HttpPost("{id}/approve")]
+        [HttpPost("{id}/approve"),
+            Produces(typeof(ReviewResult))]
         public async Task<IActionResult> PostApprove(string id, [FromBody]bool approved)
         {
             var review = ReviewRepository.Get(id);
@@ -188,7 +196,7 @@ namespace ReviewService.Controllers
 
             await ReviewRepository.Update(id, review);
 
-            return Ok(review);
+            return Ok(new ReviewResult(review));
         }
 
         public class ReviewResult
@@ -201,6 +209,9 @@ namespace ReviewService.Controllers
             public string Title { get; set; }
             public bool? IsRelevant { get; set; }
             public Dictionary<int, int> Votes { get; set; }
+
+            public int RelevantCount => Votes[1];
+            public int NotRelevantCount => Votes[-1];
 
             public ReviewResult(Review review, string authorId = null)
             {

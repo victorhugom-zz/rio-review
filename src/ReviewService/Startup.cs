@@ -48,6 +48,13 @@ namespace ReviewService
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+
+            app.UseCors(builder =>
+               builder.AllowAnyHeader()
+               .AllowAnyMethod()
+               .AllowAnyOrigin()
+               .AllowCredentials());
+
             app.UseDeveloperExceptionPage();
             app.UseMvc();
 
