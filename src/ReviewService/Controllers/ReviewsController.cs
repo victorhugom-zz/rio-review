@@ -6,25 +6,35 @@ using Microsoft.AspNetCore.Mvc;
 using ReviewService.Models;
 using ReviewService.Repositories;
 using MongoDB.Driver;
+using Microsoft.Extensions.Options;
 
 namespace ReviewService.Controllers
 {
     [Route("api/[controller]")]
     public class ReviewsController : Controller
     {
+        int DbPort { get; set; }
+        string DbHost { get; set; }
+
+        public ReviewsController(IOptions<AppSettings> appSettings)
+        {
+            DbPort = appSettings.Value.DbPort;
+            DbHost = appSettings.Value.DbHost;       
+        }
         public ReviewRepository ReviewRepository => new ReviewRepository(new MongoClient(new MongoClientSettings()
         {
-            Server = new MongoServerAddress(Program.DbHost, Program.DbPort)
+            Server = new MongoServerAddress(DbHost, DbPort)
         }));
 
         [HttpGet("ping")]
-        public IActionResult ping()
+        public IActionResult Ping()
         {
             return Ok(new
             {
                 Active = true,
-                Program.DbPort,
-                Program.DbHost,
+                DbPort,
+                DbHost,
+                v = "0.3"
             });
         }
 
@@ -41,7 +51,9 @@ namespace ReviewService.Controllers
         /// <returns>list of reviews</returns>
         [HttpGet("item/{itemId}"), 
             Produces(typeof(ReviewResult))]
-        public IActionResult GetReviewsByItems(string itemId, [FromQuery]string authorId, [FromQuery]string order, [FromQuery]int skip = 0, [FromQuery]int take = 5, [FromQuery]bool onlyApproved = true)
+        public IActionResult GetReviewsByItems(string itemId, [FromQuery]string authorId, 
+            [FromQuery]string order, [FromQuery]int skip = 0, [
+            FromQuery]int take = 5, [FromQuery]bool onlyApproved = true)
         {
             take = Math.Min(take, 100);
 

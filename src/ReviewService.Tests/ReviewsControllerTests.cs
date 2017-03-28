@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Xunit;
 using ReviewService.Controllers;
 using Shouldly;
+using Microsoft.Extensions.Options;
 
 namespace ReviewService.Tests
 {
@@ -18,7 +19,11 @@ namespace ReviewService.Tests
             // arrange
             var review = ReviewInputFixture;
 
-            var controller = new ReviewsController();
+            var options =  new OptionsManager<AppSettings>(new List<ConfigureOptions<AppSettings>>());
+
+            options.Value.DbHost = "localhost";
+            options.Value.DbPort = 27017;
+            var controller = new ReviewsController(options);
 
             // act
             var result = await controller.Post(review);
@@ -66,8 +71,11 @@ namespace ReviewService.Tests
             var review5 = ReviewInputFixture;
             review5.ItemId = itemId;
 
-            var controller = new ReviewsController();
-
+            var options = new OptionsManager<AppSettings>(new List<ConfigureOptions<AppSettings>>());
+            options.Value.DbHost = "localhost";
+            options.Value.DbPort = 27017;
+            var controller = new ReviewsController(options);
+            
             // act
             var reviewPostResult1 = await controller.Post(review1);
             var reviewResult1 = GetValueFromPostReview(reviewPostResult1);

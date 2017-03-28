@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:2441/",
+      "applicationUrl": "http://localhost:5060/",
       "sslPort": 0
     }
   },
@@ -16,20 +16,32 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "ReviewService.Ortobom": {
+    "ReviewService.Default": {
       "commandName": "Project",
-      "commandLineArgs": "--server.urls http://localhost:5052 --dbHost localhost --dbPort 27017",
+      "commandLineArgs": "--dbHost localhost --dbPort 27017",
       "launchBrowser": true,
-      "launchUrl": "http://localhost:5052/swagger/ui/index.html",
+      "applicationUrl": "http://localhost:5060",
+      "launchUrl": "swagger/ui/index.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "ReviewService.ShoppingMatriz": {
+    "ReviewService.Orto": {
       "commandName": "Project",
-      "commandLineArgs": "--server.urls http://localhost:5053 --dbHost localhost --dbPort 27017",
+      "commandLineArgs": "--dbHost localhost --dbPort 27017",
       "launchBrowser": true,
-      "launchUrl": "http://localhost:5053/swagger/ui/index.html",
+      "applicationUrl": "http://localhost:5062",
+      "launchUrl": "swagger/ui/index.html",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "ReviewService.SM": {
+      "commandName": "Project",
+      "commandLineArgs": "--dbHost localhost --dbPort 27017",
+      "launchBrowser": true,
+      "applicationUrl": "http://localhost:5063",
+      "launchUrl": "swagger/ui/index.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

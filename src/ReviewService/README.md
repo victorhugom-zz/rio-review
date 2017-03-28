@@ -19,18 +19,24 @@ docker push metheora/review-service:latest
 ### docker-compose.yml
 
 ```
-reviewservice:
-  image: metheora/review-service
-  ports:
-    - "5060:5060"
-  links:
-    - mongo
-mongo:
-  image: mongo
-  ports:
-    - "27017:27017"
-  volumes:
-    - ./db:/data/db
+version: '2'
+
+services:
+  reviewservice:
+    image: metheora/review-service
+    restart: always
+    ports:
+      - "5060:5060"
+    links:
+      - mongo
+    command: [--dbHost, mongodb, --dbPort, '27017']
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./db:/data/db
 ```
 
 ### Run

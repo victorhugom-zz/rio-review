@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +15,9 @@ namespace ReviewService
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddCommandLine(Program.Args)
                 .AddEnvironmentVariables();
+
             Configuration = builder.Build();
         }
 
@@ -41,6 +39,13 @@ namespace ReviewService
                     Description = "Reviews Api"
                 });
             });
+
+            // Setup options with DI
+            services.AddOptions();
+
+            //App settings: the things form appsettings.{env}.json
+            services.Configure<AppSettings>(Configuration);
+            services.AddSingleton<AppSettingsResolver>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

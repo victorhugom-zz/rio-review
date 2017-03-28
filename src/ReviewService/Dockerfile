@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:onbuild
+FROM microsoft/aspnetcore-build:1.1
 
 COPY . /app
 WORKDIR /app
