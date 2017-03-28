@@ -2,18 +2,22 @@
 
 # Building images
 
-docker build -t metheora/review-service .
+`docker build -t metheora/review-service .`
 
-docker tag metheora/review-service metheora/review-service:{vesion}
-docker tag metheora/review-service metheora/review-service:latest
+`docker tag metheora/review-service metheora/review-service:{vesion}`
 
-docker push metheora/review-service:{vesion}
-docker push metheora/review-service:latest
+`docker tag metheora/review-service metheora/review-service:latest`
 
-## Usage
+`docker push metheora/review-service:{vesion}`
+
+`docker push metheora/review-service:latest`
+
+## Usage Docker
 
 `mkdir review`
+
 `cd review`
+
 `touch docker-compose.yml`
 
 ### docker-compose.yml
@@ -42,3 +46,17 @@ services:
 ### Run
 
 `docker-compose up -d`
+
+
+## Usage IIS
+
+* Run a mongo instance
+* Set an appsettings.{env}.json
+
+Ex: ```
+{
+  "DbPort": 27017,
+  "DbHost": "localhost"
+}
+```
+* Run the project
