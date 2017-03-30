@@ -18,7 +18,7 @@
     },
     "ReviewService.Default": {
       "commandName": "Project",
-      "commandLineArgs": "--dbHost localhost --dbPort 27017",
+      "commandLineArgs": "--MONGO_URI 'mongodb://mongo:27017/'",
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5060",
       "launchUrl": "swagger/ui/index.html",
@@ -28,7 +28,7 @@
     },
     "ReviewService.Orto": {
       "commandName": "Project",
-      "commandLineArgs": "--dbHost localhost --dbPort 27017",
+      "commandLineArgs": "--MONGO_URI 'mongodb://mongo:27017/'",
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5062",
       "launchUrl": "swagger/ui/index.html",
@@ -38,7 +38,7 @@
     },
     "ReviewService.SM": {
       "commandName": "Project",
-      "commandLineArgs": "--dbHost localhost --dbPort 27017",
+      "commandLineArgs": "--MONGO_URI 'mongodb://mongo:27017/'",
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5063",
       "launchUrl": "swagger/ui/index.html",

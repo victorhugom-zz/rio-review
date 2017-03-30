@@ -13,18 +13,13 @@ namespace ReviewService.Controllers
     [Route("api/[controller]")]
     public class ReviewsController : Controller
     {
-        int DbPort { get; set; }
-        string DbHost { get; set; }
+        string MONGO_URI { get; set; }
 
         public ReviewsController(IOptions<AppSettings> appSettings)
         {
-            DbPort = appSettings.Value.DbPort;
-            DbHost = appSettings.Value.DbHost;       
+            MONGO_URI = appSettings.Value.MONGO_URI;       
         }
-        public ReviewRepository ReviewRepository => new ReviewRepository(new MongoClient(new MongoClientSettings()
-        {
-            Server = new MongoServerAddress(DbHost, DbPort)
-        }));
+        public ReviewRepository ReviewRepository => new ReviewRepository(new MongoClient(MONGO_URI));
 
         [HttpGet("ping")]
         public IActionResult Ping()
@@ -32,8 +27,7 @@ namespace ReviewService.Controllers
             return Ok(new
             {
                 Active = true,
-                DbPort,
-                DbHost,
+                DbPath = MONGO_URI.Split(':')[0],
                 v = "0.3"
             });
         }

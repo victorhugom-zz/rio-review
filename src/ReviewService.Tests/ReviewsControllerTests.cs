@@ -21,8 +21,7 @@ namespace ReviewService.Tests
 
             var options =  new OptionsManager<AppSettings>(new List<ConfigureOptions<AppSettings>>());
 
-            options.Value.DbHost = "localhost";
-            options.Value.DbPort = 27017;
+            options.Value.MONGO_URI = "localhost:27017";
             var controller = new ReviewsController(options);
 
             // act
@@ -72,8 +71,7 @@ namespace ReviewService.Tests
             review5.ItemId = itemId;
 
             var options = new OptionsManager<AppSettings>(new List<ConfigureOptions<AppSettings>>());
-            options.Value.DbHost = "localhost";
-            options.Value.DbPort = 27017;
+            options.Value.MONGO_URI = "localhost:27017";
             var controller = new ReviewsController(options);
             
             // act

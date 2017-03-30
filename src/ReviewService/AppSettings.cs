@@ -4,8 +4,7 @@ namespace ReviewService
 {
     public class AppSettings
     {
-        public int DbPort { get; set; }
-        public string DbHost { get; set; }
+        public string MONGO_URI { get; set; }
     }
 
     public class AppSettingsResolver

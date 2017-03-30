@@ -33,7 +33,7 @@ services:
       - "5060:5060"
     links:
       - mongo
-    command: [--dbHost, mongodb, --dbPort, '27017']
+    command: [--MONGO_URI, 'mongodb://mongo:27017']
   mongo:
     image: mongo
     restart: always
