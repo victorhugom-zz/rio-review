@@ -13,6 +13,8 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile></DocumentationFile>
+    <DefineConstants>TRACE;DEBUG;NETCOREAPP1_1</DefineConstants>
+    <OutputPath>bin\Debug\netcoreapp1.1\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
